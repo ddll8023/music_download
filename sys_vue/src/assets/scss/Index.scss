@@ -1,0 +1,275 @@
+.el-container {
+  .el-header {
+    top: 0;
+    height: 60px;
+    width: 100%;
+    position: fixed;
+    z-index: 1000;
+    background: linear-gradient(135deg, #2a3042 0%, #1a1f2e 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        .el-image {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+        }
+
+        .title {
+          color: white;
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 500;
+        }
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &:hover {
+          color: #409EFF;
+        }
+
+        .el-icon {
+          font-size: 1.2rem;
+        }
+      }
+    }
+  }
+
+  .el-aside {
+    width: 200px;
+    min-width: 200px; // 添加最小宽度防止收缩
+    height: 100vh;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    z-index: 999;
+    background: #2a3042;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 更平滑的贝塞尔曲线
+    overflow: hidden; // 防止内容溢出
+    will-change: transform, width, min-width; // 优化性能
+    transform: translateZ(0); // 启用GPU加速
+    backface-visibility: hidden; // 防止闪烁
+    perspective: 1000;
+
+    .el-menu {
+      border-right: none;
+      padding-top: 20px;
+
+      .el-menu-item,
+      .el-sub-menu {
+        transition: all 0.3s;
+
+        &.is-active {
+          background: #409EFF20;
+          border-left: 4px solid #409EFF;
+        }
+
+        /* 非激活悬停状态 */
+        &:not(.is-active):hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+      }
+    }
+
+    // 移动端样式
+    @media screen and (max-width: 768px) {
+      width: 60px;
+      min-width: 60px;
+
+      // 优化过渡效果，分离属性
+      transition-property: transform, width, min-width;
+      transition-duration: 0.3s, 0.25s, 0.25s;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+      &.hidden {
+        transform: translateX(-100%);
+        width: 0;
+        min-width: 0;
+        // 先完成位移，再调整宽度
+        transition-property: transform, width, min-width;
+        transition-duration: 0.3s, 0.1s, 0.1s;
+        transition-delay: 0s, 0.2s, 0.2s;
+      }
+
+      &.collapsed {
+        width: 0;
+        min-width: 0;
+        transform: translateX(-100%);
+      }
+
+      // 隐藏菜单文字
+      :deep(.el-menu--collapse) {
+        width: 60px;
+
+        .el-menu-item span {
+          display: none !important;
+        }
+      }
+    }
+  }
+
+  .el-main {
+    width: calc(100% - 200px);
+    margin-left: 200px;
+    height: calc(100vh - 60px);
+    margin-top: 60px;
+    background: #f5f7fa;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); // 更平滑的贝塞尔曲线
+    padding: 20px;
+    will-change: width, margin-left; // 优化性能
+    transform: translateZ(0); // 启用GPU加速
+
+    // 移动端样式
+    @media screen and (max-width: 768px) {
+      width: 100% !important;
+      margin-left: 0 !important;
+      padding: 15px 10px !important;
+
+      &.mobile-main-expanded {
+        width: calc(100% - 60px) !important;
+        margin-left: 60px !important;
+      }
+    }
+  }
+}
+
+// 适配小屏幕
+@media screen and (max-width: 768px) {
+  .el-container .el-header .header-content {
+    padding: 0 10px;
+
+    .brand {
+      gap: 8px;
+
+      .title {
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  // 优化播放器在移动端的显示
+  :deep(.global-player-bar) {
+    padding: 0 10px;
+
+    .player-left {
+      width: auto;
+      gap: 8px;
+
+      .cur-song-img {
+        width: 45px;
+        height: 45px;
+      }
+    }
+
+    .player-center {
+      max-width: none;
+
+      .controls {
+        gap: 10px;
+      }
+    }
+
+    .player-right {
+      width: auto;
+    }
+  }
+
+  // 移动端专用菜单样式
+  .mobile-menu-item {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .el-icon {
+      margin-right: 0;
+      font-size: 22px;
+    }
+  }
+
+  // 确保主要内容区域与侧边栏的间隙调整
+  .el-container .el-main:not(.hidden) {
+    width: calc(100% - 60px);
+    margin-left: 60px;
+  }
+
+  // 修复侧边栏在中等屏幕时可能出现的宽度问题
+  .el-container .el-aside {
+    &.mobile-aside:not(.hidden) {
+      width: 60px !important;
+      min-width: 60px !important;
+    }
+
+    &.mobile-aside.hidden {
+      width: 0 !important;
+      min-width: 0 !important;
+      // 优化过渡
+      transition-property: transform, width, min-width;
+      transition-duration: 0.3s, 0.1s, 0.1s;
+      transition-delay: 0s, 0.2s, 0.2s;
+    }
+  }
+
+  // 确保主内容区域随侧边栏状态调整
+  .el-container .el-main {
+    &.mobile-main {
+      width: 100% !important;
+      margin-left: 0 !important;
+    }
+
+    &.mobile-main-expanded {
+      width: calc(100% - 60px) !important;
+      margin-left: 60px !important;
+    }
+  }
+}
+
+// 对于较大移动设备的额外优化 (横屏手机/小平板)
+@media screen and (min-width: 481px) and (max-width: 768px) {
+  .el-container .el-aside {
+    &.mobile-aside:not(.hidden) {
+      width: 60px !important;
+      min-width: 60px !important;
+    }
+
+    &.mobile-aside.hidden,
+    &.mobile-aside.collapsed {
+      width: 0 !important;
+      min-width: 0 !important;
+      transform: translateX(-100%);
+    }
+  }
+
+  .el-container .el-main {
+    &.mobile-main-expanded {
+      width: calc(100% - 60px) !important;
+      margin-left: 60px !important;
+    }
+  }
+}
+
+// 动画过渡优化
+.transitioning {
+
+  .el-aside,
+  .el-main {
+    pointer-events: none; // 防止过渡中的交互导致异常
+  }
+}
