@@ -3,7 +3,7 @@ import axios from "axios";
 import router from "@/router/index.js";
 
 const request = axios.create({
-	baseURL: "http://localhost:8080",
+	baseURL: "http://localhost:6854",
 	// baseURL: "http://47.92.175.157:8080",
 	timeout: 300000,
 });

@@ -1,13 +1,20 @@
-from qqmusic_api.song import SongFileType, get_detail,get_song_urls,EncryptedSongFileType
+from qqmusic_api.song import (
+    SongFileType,
+    get_detail,
+    get_song_urls,
+    EncryptedSongFileType,
+)
 import json
 import os
 from credential.get_credential import get_credential
 from qqmusic_api.songlist import get_songlist
+import asyncio
 
 
 async def search_song(song_id: int):
     # 获取歌曲详情
     song_detail = await get_detail(song_id)
+    # print(f'song_detail:{song_detail}')
     # 保存到临时json文件
     temp_path = os.path.join(os.path.dirname(__file__), "temp_song_detail.json")
     with open(temp_path, "w", encoding="utf-8") as f:
@@ -17,13 +24,15 @@ async def search_song(song_id: int):
     song_mid = song_detail.get("track_info").get("mid")
     credential = get_credential()
     # 获取歌曲下载链接
-    song_urls = await get_song_urls(mid=[song_mid],file_type= SongFileType.FLAC,credential=credential)
+    song_urls = await get_song_urls(
+        mid=[song_mid], file_type=SongFileType.FLAC, credential=credential
+    )
+    print(f"credential:{credential}")
     print(f"song_urls: {song_urls}")
 
     try:
         genre: str = " / ".join(
-            item["value"]
-            for item in song_detail["info"]["genre"]["content"]
+            item["value"] for item in song_detail["info"]["genre"]["content"]
         )
     except KeyError:
         genre: str = ""
@@ -69,12 +78,15 @@ async def search_song(song_id: int):
     }
     return data
 
-async def search_songlist(songlist_id:int, page: int = 1, page_size: int = 10, request_id: str = '0'):
+
+async def search_songlist(
+    songlist_id: int, page: int = 1, page_size: int = 10, request_id: str = "0"
+):
     songlist = await get_songlist(songlist_id)
     # 保存到临时json文件
-    temp_path = os.path.join(os.path.dirname(__file__), "temp_song_detail.json")
-    with open(temp_path, "w", encoding="utf-8") as f:
-        json.dump(songlist, f, ensure_ascii=False, indent=2)
+    # temp_path = os.path.join(os.path.dirname(__file__), "temp_song_detail.json")
+    # with open(temp_path, "w", encoding="utf-8") as f:
+    #     json.dump(songlist, f, ensure_ascii=False, indent=2)
     # print(f"songlist: {songlist}")
 
     # 计算分页
@@ -130,10 +142,18 @@ async def search_songlist(songlist_id:int, page: int = 1, page_size: int = 10, r
         )
     return data
 
-async def get_song_url_list(song_mid_list:list,file_type,credential):
-    song_urls = await get_song_urls(mid=song_mid_list,file_type=file_type,credential=credential)
+
+async def get_song_url_list(song_mid_list: list, file_type, credential):
+    song_urls = await get_song_urls(
+        mid=song_mid_list, file_type=file_type, credential=credential
+    )
     # 保存到临时json文件
-    temp_path = os.path.join(os.path.dirname(__file__), "temp_song_urls.json")
-    with open(temp_path, "w", encoding="utf-8") as f:
-        json.dump(song_urls, f, ensure_ascii=False, indent=2)
+    # temp_path = os.path.join(os.path.dirname(__file__), "temp_song_urls.json")
+    # with open(temp_path, "w", encoding="utf-8") as f:
+    #     json.dump(song_urls, f, ensure_ascii=False, indent=2)
     return song_urls
+
+
+if __name__ == "__main__":
+    data = asyncio.run(search_song(song_id=233704216))
+    print(data)

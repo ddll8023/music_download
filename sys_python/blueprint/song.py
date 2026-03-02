@@ -191,13 +191,24 @@ def get_song_url():
         )
         logging.info(f"查询歌曲链接:{song_url_list} 成功")
         for song_id, url_info in song_url_list.items():
-            song_url_dict = {"url": "", "urlType": "mp3"}
+            song_url_dict = {"url": "", "urlType": "mp3", "fileSize": 0}
             # song_url = url_info[0]  # 第一个元素是URL
             song_url = url_info
             if song_url:
                 song_url_dict["url"] = song_url
                 if "flac" in song_url.lower():
                     song_url_dict["urlType"] = "flac"
+
+                # 通过HEAD请求获取文件大小
+                try:
+                    head_response = httpx.head(song_url, follow_redirects=True, timeout=5.0)
+                    content_length = head_response.headers.get("content-length")
+                    if content_length:
+                        song_url_dict["fileSize"] = int(content_length)
+                        logging.debug(f"获取文件大小成功: {song_url_dict['fileSize']} bytes")
+                except Exception as e:
+                    logging.warning(f"获取文件大小失败: {e}")
+                    song_url_dict["fileSize"] = 0
             else:
                 song_url_dict["url"] = "null"
             data["result"].append(song_url_dict)

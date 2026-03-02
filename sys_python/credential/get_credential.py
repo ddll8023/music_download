@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 from qqmusic_api import Credential
@@ -17,14 +18,15 @@ def get_credential():
         exit(1)
 
 
-def judge_credential():
+async def judge_credential():
     credential = get_credential()
     print(f"credential:{credential}")
-    print(f"credential是否有效:{Credential.raise_for_invalid(credential)}")
+    # print(f"credential是否有效:{Credential.raise_for_invalid(credential)}")
     # print(f"credential是否能刷新:{sync(credential.can_refresh())}")
     # print(f"credential刷新:{sync(credential.refresh())}")
-    # print(f"credential是否过期:{sync(Credential.is_expired(credential))}")
+    print(f"credential是否过期:{await Credential.is_expired(credential)}")
 
 
-get_credential()
+# get_credential()
+# asyncio.run(judge_credential())
 #

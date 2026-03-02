@@ -234,6 +234,19 @@ const handleAllDownload = async () => {
   }
 };
 
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (!bytes || bytes === 0) return '未知';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+  return `${size.toFixed(1)} ${units[unitIndex]}`;
+};
+
 
 </script>
 
@@ -272,6 +285,19 @@ const handleAllDownload = async () => {
         <el-table-column prop="album.albumName" label="专辑" min-width="120" />
         <el-table-column prop="createTime" label="出版时间" min-width="100" />
         <el-table-column prop="duration" label="时长" min-width="60" />
+        <el-table-column label="格式" min-width="70" align="center">
+          <template #default="{ row }">
+            <el-tag v-if="row.songUrl?.urlType" type="primary" size="small">
+              {{ row.songUrl.urlType.toUpperCase() }}
+            </el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="大小" min-width="90" align="center">
+          <template #default="{ row }">
+            <span>{{ formatFileSize(row.songUrl?.fileSize) }}</span>
+          </template>
+        </el-table-column>
         <el-table-column min-width="60" fixed="right">
           <template #default="{ row }">
             <el-tooltip :content="row.songUrl?.url === 'null' || !row.songUrl?.url ? '该歌曲链接无效，无法下载' : '点击下载'"

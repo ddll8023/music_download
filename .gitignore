@@ -1,0 +1,9 @@
+.idea
+
+sys_python/.idea
+sys_python/.venv
+sys_python/app.log
+sys_python/credential/credential.json
+
+sys_vue/dist
+sys_vue/node_modules
