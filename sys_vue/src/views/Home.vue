@@ -168,7 +168,7 @@ const handleDownload = async (song) => {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${song.songName} - ${song.singer}.${song.songUrl.urlType}`; // 现在可以自定义文件名
+    link.download = `${song.songName}-${song.singer}.${song.songUrl.urlType}`; // 现在可以自定义文件名
     document.body.appendChild(link);
     link.click();
 

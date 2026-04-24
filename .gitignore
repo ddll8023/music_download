@@ -1,4 +1,7 @@
 .idea
+.claude
+__pycache__/
+
 
 sys_python/.idea
 sys_python/.venv
@@ -7,3 +10,10 @@ sys_python/credential/credential.json
 
 sys_vue/dist
 sys_vue/node_modules
+
+
+app.log
+start_backend.bat
+start_frontend.bat
+启动后端.bat
+启动前端.bat

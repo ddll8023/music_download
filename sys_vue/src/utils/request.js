@@ -3,7 +3,7 @@ import axios from "axios";
 import router from "@/router/index.js";
 
 const request = axios.create({
-	baseURL: "http://localhost:6854",
+	baseURL: "http://localhost:3492",
 	// baseURL: "http://47.92.175.157:8080",
 	timeout: 300000,
 });
@@ -38,12 +38,16 @@ request.interceptors.response.use(
 		return res;
 	},
 	(error) => {
-		if (error.response.status === 404) {
-			ElMessage.error("请求接口不存在");
-		} else if (error.response.status === 500) {
-			ElMessage.error("服务器异常");
-		} else if (error.response.status === 401) {
-			ElMessage.error("未授权，请重新登录");
+		if (error.response) {
+			if (error.response.status === 404) {
+				ElMessage.error("请求接口不存在");
+			} else if (error.response.status === 500) {
+				ElMessage.error("服务器异常");
+			} else if (error.response.status === 401) {
+				ElMessage.error("未授权，请重新登录");
+			} else {
+				console.log(error.message);
+			}
 		} else {
 			console.log(error.message);
 		}

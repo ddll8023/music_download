@@ -7,7 +7,7 @@ app = Flask(__name__)
 # 跨域配置
 CORS(
     app,
-    origins=["http://localhost:5173"],  # 明确允许localhost:5173
+    origins=["http://localhost:3493"],  # 明确允许localhost:3493
     supports_credentials=True,  # 允许携带凭证
     allow_headers=["Content-Type", "Authorization", "token"],  # 允许的请求头
     methods=["GET", "POST", "OPTIONS"],  # 明确允许OPTIONS预检请求
@@ -19,4 +19,4 @@ app.register_blueprint(song_bp)
 
 
 if __name__ == "__main__":
-    app.run(port=6854, debug=True)
+    app.run(port=3492, debug=True)

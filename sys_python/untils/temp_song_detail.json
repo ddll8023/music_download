@@ -1,0 +1,281 @@
+{
+  "info": {
+    "genre": {
+      "title": "歌曲流派",
+      "type": "JUMP_TO_CATEGORY",
+      "content": [
+        {
+          "id": 40,
+          "value": "Pop",
+          "mid": "",
+          "type": 0,
+          "show_type": 2,
+          "is_parent": 0,
+          "picurl": "",
+          "read_cnt": 0,
+          "author": "",
+          "jumpurl": "http://y.qq.com/m/client/categoryzone/detail.html?categoryId=40&showType=2&isParent=0&_hidehd=1&groupId=100",
+          "ori_picurl": ""
+        }
+      ],
+      "pos": 12,
+      "more": 0,
+      "selected": "genre",
+      "use_platform": 3
+    },
+    "intro": {
+      "title": "简介",
+      "type": "SPECIAL_DISPLAY",
+      "content": [
+        {
+          "id": 0,
+          "value": "《雄狮少年》这部动画电影的主题曲《无名的人》，由才华横溢的毛不易倾情演唱，词作者唐恬精心打造歌词，而钱雷则为其谱曲。这首歌曲于2021年12月14日问世，并被收录在同名专辑《无名的人》中。它通过深情的歌词，传递了普通人在日常生活中的奋斗与执着，以及对那些默默无闻英雄的深深敬仰。",
+          "mid": "",
+          "type": 0,
+          "show_type": 0,
+          "is_parent": 0,
+          "picurl": "",
+          "read_cnt": 0,
+          "author": "",
+          "jumpurl": "",
+          "ori_picurl": ""
+        }
+      ],
+      "pos": 52,
+      "more": 0,
+      "selected": "intro",
+      "use_platform": 3
+    },
+    "lan": {
+      "title": "歌曲语种",
+      "type": "JUMP_TO_CATEGORY",
+      "content": [
+        {
+          "id": 0,
+          "value": " 纯音乐",
+          "mid": "",
+          "type": 0,
+          "show_type": 0,
+          "is_parent": 0,
+          "picurl": "",
+          "read_cnt": 0,
+          "author": "",
+          "jumpurl": "",
+          "ori_picurl": ""
+        }
+      ],
+      "pos": 11,
+      "more": 0,
+      "selected": "lan",
+      "use_platform": 3
+    },
+    "pub_time": {
+      "title": "发行时间",
+      "type": "desc",
+      "content": [
+        {
+          "id": 0,
+          "value": "2021-12-14",
+          "mid": "",
+          "type": 0,
+          "show_type": 0,
+          "is_parent": 0,
+          "picurl": "",
+          "read_cnt": 0,
+          "author": "",
+          "jumpurl": "",
+          "ori_picurl": ""
+        }
+      ],
+      "pos": 50,
+      "more": 0,
+      "selected": "pub_time",
+      "use_platform": 0
+    }
+  },
+  "extras": {
+    "name": "无名的人 (伴奏)",
+    "transname": "",
+    "subtitle": "",
+    "from": "0",
+    "wikiurl": ""
+  },
+  "track_info": {
+    "id": 336583097,
+    "type": 1,
+    "mid": "003sYBSx2GjwtJ",
+    "name": "无名的人",
+    "title": "无名的人 (伴奏)",
+    "subtitle": "",
+    "singer": [
+      {
+        "id": 0,
+        "mid": "",
+        "name": "毛不易",
+        "title": "毛不易",
+        "type": 0,
+        "uin": 0
+      }
+    ],
+    "album": {
+      "id": 24100646,
+      "mid": "002mPgSG01LLtu",
+      "name": "无名的人",
+      "title": "无名的人",
+      "subtitle": "",
+      "time_public": "2021-12-14",
+      "pmid": "002mPgSG01LLtu_2"
+    },
+    "mv": {
+      "id": 0,
+      "vid": "",
+      "name": "",
+      "title": "",
+      "vt": 0
+    },
+    "interval": 282,
+    "isonly": 0,
+    "language": 9,
+    "genre": 1,
+    "index_cd": 0,
+    "index_album": 2,
+    "time_public": "2021-12-14",
+    "status": 0,
+    "fnote": 8013,
+    "file": {
+      "media_mid": "003xlMha2ShQv7",
+      "size_24aac": 0,
+      "size_48aac": 1731396,
+      "size_96aac": 3475661,
+      "size_192ogg": 6338292,
+      "size_192aac": 6836887,
+      "size_128mp3": 4516247,
+      "size_320mp3": 11290320,
+      "size_ape": 0,
+      "size_flac": 52192339,
+      "size_dts": 0,
+      "size_try": 960887,
+      "try_begin": 176552,
+      "try_end": 236388,
+      "url": "",
+      "size_hires": 0,
+      "hires_sample": 0,
+      "hires_bitdepth": 0,
+      "b_30s": 0,
+      "e_30s": 60000,
+      "size_96ogg": 3189407,
+      "size_360ra": [],
+      "size_dolby": 0,
+      "size_new": [
+        176655362,
+        23828697,
+        59697342,
+        10547229,
+        0,
+        20024425,
+        32738683,
+        2681388,
+        24830046,
+        7950860
+      ]
+    },
+    "pay": {
+      "pay_month": 1,
+      "price_track": 200,
+      "price_album": 0,
+      "pay_play": 0,
+      "pay_down": 0,
+      "pay_status": 0,
+      "time_free": 0
+    },
+    "action": {
+      "switch": 3227447,
+      "msgid": 0,
+      "alert": 11,
+      "icons": 1217096,
+      "msgshare": 0,
+      "msgfav": 0,
+      "msgdown": 0,
+      "msgpay": 0,
+      "switch2": 524288,
+      "icon2": 0
+    },
+    "ksong": {
+      "id": 25039189,
+      "mid": "000D7Y7N4DRZBC"
+    },
+    "volume": {
+      "gain": -7.626,
+      "peak": 0.914,
+      "lra": 19.62
+    },
+    "label": "0",
+    "url": "",
+    "bpm": 66,
+    "version": 8,
+    "trace": "",
+    "data_type": 0,
+    "modify_stamp": 0,
+    "pingpong": "",
+    "ppurl": "",
+    "tid": 0,
+    "ov": 0,
+    "sa": 16,
+    "es": "",
+    "vs": [
+      "060PewWk0elBFQ",
+      "",
+      "",
+      "003G96IK1jNjv7",
+      "000SzOHT4FE2iw",
+      "",
+      "",
+      "",
+      "",
+      "002JHL6E1jyAWb",
+      "",
+      "",
+      "",
+      "002NRGC3355Qxs",
+      "",
+      "",
+      "",
+      "004cGzqe2io2AY",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "004McTPx457N5r",
+      "004BcbZ41faUyK",
+      "",
+      "",
+      "",
+      "002dmlqd4c8Pg5",
+      "0010vD5D4Pdbon",
+      "0035oAJM29GmAW",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "vi": [
+      1892,
+      233,
+      223,
+      3796592,
+      176552,
+      206552,
+      1
+    ],
+    "ktag": "0",
+    "vf": [
+      -7.63172,
+      0.922546,
+      19.615,
+      0,
+      0,
+      0
+    ]
+  }
+}
