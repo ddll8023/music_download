@@ -1,18 +1,13 @@
+"""QQ 音乐二维码登录脚本"""
 import asyncio
 import json
 import os.path
 
-from qqmusic_api.login import (
-    QR,
-    LoginError,
-    QRCodeLoginEvents,
-    QRLoginType,
-    check_qrcode,
-    get_qrcode,
-)
+from qqmusic_api import Client
+from qqmusic_api.models.login import QRLoginType, QRCodeLoginEvents
 
 
-def show_qrcode(qr: QR):
+def show_qrcode(qr):
     """显示二维码"""
     try:
         from io import BytesIO
@@ -23,11 +18,10 @@ def show_qrcode(qr: QR):
 
         img = Image.open(BytesIO(qr.data))
         url = decode(img)[0].data.decode("utf-8")
-        qr = QRCode()
-        qr.add_data(url)
-        qr.print_ascii()
+        qr_terminal = QRCode()
+        qr_terminal.add_data(url)
+        qr_terminal.print_ascii()
     except ImportError:
-        # 保存二维码到当前目录
         save_path = qr.save()
         print(f"二维码已保存至: {save_path}")
 
@@ -36,31 +30,29 @@ async def qrcode_login_example(login_type: QRLoginType):
     """二维码登录示例"""
 
     try:
-        # 1. 获取二维码
-        qr = await get_qrcode(login_type)
-        print(f"获取 {login_type.name} 二维码成功")
+        async with Client() as client:
+            qr = await client.login.get_qrcode(login_type)
+            print(f"获取 {login_type.name} 二维码成功")
 
-        show_qrcode(qr)
+            show_qrcode(qr)
 
-        # 2. 轮询检查扫码状态
-        while True:
-            event, credential = await check_qrcode(qr)
-            print(f"当前状态: {event.name}")
+            while True:
+                result = await client.login.check_qrcode(qr)
+                print(f"当前状态: {result.event.name}")
 
-            if event == QRCodeLoginEvents.DONE:
-                print(f"登录成功! MusicID: {credential.musicid}")
-                return credential
-            if event == QRCodeLoginEvents.TIMEOUT:
-                print("二维码已过期,请重新获取")
-                break
-            if event == QRCodeLoginEvents.SCAN:
-                await asyncio.sleep(5)  # 5秒轮询一次
-            else:
-                await asyncio.sleep(2)
+                if result.event == QRCodeLoginEvents.DONE:
+                    print(f"登录成功! MusicID: {result.credential.musicid}")
+                    return result.credential
+                if result.event == QRCodeLoginEvents.TIMEOUT:
+                    print("二维码已过期,请重新获取")
+                    break
+                if result.event == QRCodeLoginEvents.SCAN:
+                    await asyncio.sleep(5)
+                else:
+                    await asyncio.sleep(2)
 
-    except LoginError as e:
+    except Exception as e:
         print(f"登录失败: {e!s}")
-    except Exception:
         raise
 
 
@@ -73,11 +65,16 @@ async def main():
 
     if choice == "1":
         credential = await qrcode_login_example(QRLoginType.QQ)
-        print(credential.as_json())
-        with open(os.path.join(os.path.dirname(__file__),'credential.json'),'w',encoding='utf-8') as f:
-            f.write(credential.as_json())
+        credential_json = credential.model_dump_json()
+        print(credential_json)
+        with open(os.path.join(os.path.dirname(__file__), "credential.json"), "w", encoding="utf-8") as f:
+            f.write(credential_json)
     elif choice == "2":
-        await qrcode_login_example(QRLoginType.WX)
+        credential = await qrcode_login_example(QRLoginType.WX)
+        credential_json = credential.model_dump_json()
+        print(credential_json)
+        with open(os.path.join(os.path.dirname(__file__), "credential.json"), "w", encoding="utf-8") as f:
+            f.write(credential_json)
     else:
         print("无效的选项")
 

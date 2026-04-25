@@ -1,32 +1,23 @@
-import asyncio
+"""凭证加载模块"""
 import json
 import os
-from qqmusic_api import Credential
+from qqmusic_api.models.request import Credential
 
 
-def get_credential():
+def get_credential() -> Credential:
+    """从本地 JSON 文件加载凭证"""
     try:
         credential_path = os.path.join(os.path.dirname(__file__), "credential.json")
-        # print(f"credential_path:{credential_path}")
         with open(credential_path, "r") as f:
-            credential_json = f.read()
-            credential_dict = json.loads(credential_json)
-        credential = Credential.from_cookies_dict(credential_dict)
-        return credential
+            credential_dict = json.loads(f.read())
+        return Credential.model_validate(credential_dict)
     except FileNotFoundError:
         print("请先登录")
         exit(1)
 
 
 async def judge_credential():
+    """检查凭证是否过期"""
     credential = get_credential()
     print(f"credential:{credential}")
-    # print(f"credential是否有效:{Credential.raise_for_invalid(credential)}")
-    # print(f"credential是否能刷新:{sync(credential.can_refresh())}")
-    # print(f"credential刷新:{sync(credential.refresh())}")
-    print(f"credential是否过期:{await Credential.is_expired(credential)}")
-
-
-# get_credential()
-# asyncio.run(judge_credential())
-#
+    print(f"credential是否过期:{credential.is_expired()}")
