@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #409EFF;
+  --color-sidebar: #2a3042;
+  --color-sidebar-text: #b5b6bd;
+  --color-bg: #f5f7fa;
+  --color-border: #ebeef5;
+  --color-text: #333333;
+  --color-text-secondary: #909399;
+}
+
+@layer base {
+  body {
+    @apply m-0 p-0 text-base text-gray-800 overflow-x-hidden;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white p-2.5 rounded shadow-md;
+  }
+}

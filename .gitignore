@@ -10,7 +10,8 @@ sys_python/credential/credential.json
 
 sys_vue/dist
 sys_vue/node_modules
-
+sys_vue/.env.development
+sys_vue/.env.production
 
 app.log
 start_backend.bat
