@@ -1,22 +1,35 @@
-from flask import Flask
+import argparse
+
+from flask import Flask, jsonify
 from flask_cors import CORS
 from blueprint.song import song_bp
 
 
-app = Flask(__name__)
-# 跨域配置
-CORS(
-    app,
-    origins=["http://localhost:3493"],  # 明确允许localhost:3493
-    supports_credentials=True,  # 允许携带凭证
-    allow_headers=["Content-Type", "Authorization", "token"],  # 允许的请求头
-    methods=["GET", "POST", "OPTIONS"],  # 明确允许OPTIONS预检请求
-    expose_headers=["Content-Type", "Access-Control-Allow-Origin"],
-)  # 预检请求缓存时间，减少OPTIONS请求次数
+def create_app():
+    app = Flask(__name__)
+    CORS(
+        app,
+        origins=["http://localhost:3493"],
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization", "token"],
+        methods=["GET", "POST", "OPTIONS"],
+        expose_headers=["Content-Type", "Access-Control-Allow-Origin"],
+    )
 
+    app.register_blueprint(song_bp)
 
-app.register_blueprint(song_bp)
+    @app.route("/health")
+    def health():
+        return jsonify({"status": "ok"})
+
+    return app
 
 
 if __name__ == "__main__":
-    app.run(port=3492, debug=True)
+    parser = argparse.ArgumentParser(description="Music Download Backend")
+    parser.add_argument("--port", type=int, default=3492, help="Flask 服务端口")
+    parser.add_argument("--debug", action="store_true", help="启用调试模式")
+    args = parser.parse_args()
+
+    app = create_app()
+    app.run(port=args.port, debug=args.debug)

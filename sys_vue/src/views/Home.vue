@@ -1,12 +1,23 @@
 <script setup>
 /**
- * 音乐下载页
+ * Home 音乐下载页
  * 功能描述：搜索/下载音乐，展示搜索结果表格，支持分页和批量下载
+ * 依赖组件：无
+ * Source: 规范文档/前端规范文档.md §6 API 调用规范
  */
+// 1. Vue 官方 API
 import { computed, nextTick, reactive, ref } from 'vue'
-import { searchSongs, getAlbumImages, getSongUrls } from '@/api/song'
-import { showToast } from '@/utils/toast'
+
+// 2. Pinia Store
 import { useCurSongDataStore } from '@/stores/Song'
+
+// 3. 工具函数 / 常量
+import { showToast } from '@/utils/toast'
+
+// 4. API 接口定义
+import { searchSongs, getAlbumImages, getSongUrls } from '@/api/song'
+
+// 5. 子组件 / 资源导入
 import DefaultImg from '@/assets/img/init_img.jpg'
 
 const curSongStore = useCurSongDataStore()
@@ -112,20 +123,16 @@ const handleDownload = async (song) => {
       showToast('音乐链接获取失败', 'warning')
       return
     }
-    const response = await fetch(song.songUrl.url)
-    const blob = await response.blob()
-    const url = window.URL.createObjectURL(blob)
 
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${song.songName}-${song.singer}.${song.songUrl.urlType}`
-    document.body.appendChild(link)
-    link.click()
-
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(link)
-    }, 5000)
+    const success = await window.electronAPI.downloadFile({
+      url: song.songUrl.url,
+      filename: `${song.songName}-${song.singer}.${song.songUrl.urlType}`,
+    })
+    if (success) {
+      showToast('下载成功', 'success')
+    } else {
+      showToast('下载取消或失败', 'warning')
+    }
   } catch (error) {
     console.error('下载失败:', error)
     showToast('文件下载失败', 'error')
@@ -208,26 +215,29 @@ const formatFileSize = (bytes) => {
 <template>
   <div class="flex flex-col h-full">
     <!-- 顶部搜索区域 -->
-    <div class="flex flex-col items-center justify-center min-h-[150px]">
-      <span class="text-3xl font-bold mb-6">音乐下载平台</span>
-      <div class="flex gap-5 items-center flex-wrap justify-center">
-        <div class="flex gap-3">
-          <button
-            class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors text-base font-medium"
-            @click="toggleSelectAll"
-          >
-            {{ selectAllChecked ? '取消全选' : '一键全选' }}
-          </button>
-          <button
-            class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors text-base font-medium"
-            @click="handleAllDownload"
-          >
-            全部下载
-          </button>
-        </div>
+    <header class="flex flex-col items-center justify-center min-h-[160px] relative">
+      <!-- 背景微光装饰 -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="home-glow"></div>
+      </div>
+
+      <span class="text-2xl font-bold mb-5 tracking-wide text-theme-text">音乐下载平台</span>
+      <div class="flex gap-3 items-center flex-wrap justify-center relative z-10">
+        <button
+          class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer border-none btn-outline"
+          @click="toggleSelectAll"
+        >
+          {{ selectAllChecked ? '取消全选' : '一键全选' }}
+        </button>
+        <button
+          class="px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer border-none btn-primary"
+          @click="handleAllDownload"
+        >
+          全部下载
+        </button>
         <select
           v-model="searchData.urlType"
-          class="h-[42px] w-[110px] px-3 border border-gray-300 rounded-lg bg-white text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          class="h-[40px] w-[100px] px-3 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 cursor-pointer select-dark"
         >
           <option v-for="item in searchData.searchUrlType" :key="item.index" :value="item.value">
             {{ item.label }}
@@ -236,138 +246,168 @@ const formatFileSize = (bytes) => {
         <div class="relative">
           <font-awesome-icon
             :icon="['fas', 'magnifying-glass']"
-            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-theme-text-secondary"
+            aria-hidden="true"
           />
           <input
             v-model="searchData.searchUrl"
-            placeholder="请输入链接"
-            class="h-[42px] w-[600px] max-w-[60vw] pl-10 pr-4 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="请输入歌曲或歌单链接..."
+            class="h-[40px] w-[520px] max-w-[55vw] pl-10 pr-4 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 transition-shadow input-dark"
             @keyup.enter="handleSearch"
           />
         </div>
         <button
-          class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors text-base font-medium"
+          class="px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer border-none btn-primary"
           @click="handleSearch"
         >
           查询
         </button>
       </div>
-    </div>
+    </header>
 
-    <!-- 歌曲列表表格 -->
-    <div class="flex-1 overflow-x-hidden w-full mb-2.5">
-      <table class="w-full border-collapse bg-white rounded-lg shadow-sm">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="w-10 px-2 py-3 text-center text-sm font-medium text-gray-600">
-              <input type="checkbox" v-model="selectAllChecked" @change="toggleSelectAll" class="cursor-pointer" />
-            </th>
-            <th class="w-10 px-2 py-3 text-center text-sm font-medium text-gray-600">序号</th>
-            <th class="w-20 px-2 py-3 text-center text-sm font-medium text-gray-600">封面</th>
-            <th class="min-w-[120px] px-3 py-3 text-left text-sm font-medium text-gray-600">歌名</th>
-            <th class="min-w-[100px] px-3 py-3 text-left text-sm font-medium text-gray-600">歌手</th>
-            <th class="min-w-[120px] px-3 py-3 text-left text-sm font-medium text-gray-600">专辑</th>
-            <th class="min-w-[100px] px-3 py-3 text-left text-sm font-medium text-gray-600">出版时间</th>
-            <th class="min-w-[60px] px-3 py-3 text-left text-sm font-medium text-gray-600">时长</th>
-            <th class="w-[70px] px-2 py-3 text-center text-sm font-medium text-gray-600">格式</th>
-            <th class="w-[90px] px-2 py-3 text-center text-sm font-medium text-gray-600">大小</th>
-            <th class="w-[60px] px-2 py-3 text-center text-sm font-medium text-gray-600">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(song, index) in songData.songList"
-            :key="index"
-            class="hover:bg-gray-50 border-b border-gray-100 transition-colors"
+    <!-- 歌曲列表 -->
+    <section class="flex-1 overflow-x-hidden w-full mb-2.5 rounded-xl overflow-hidden bg-surface border border-theme-border">
+      <!-- 列表头部 -->
+      <div class="song-list-header grid items-center px-4 py-2.5 text-xs font-semibold uppercase tracking-wider">
+        <div class="flex justify-center">
+          <input type="checkbox" v-model="selectAllChecked" @change="toggleSelectAll" class="cursor-pointer accent-primary" />
+        </div>
+        <div class="text-center">#</div>
+        <div></div>
+        <div class="pl-2">歌名</div>
+        <div>歌手</div>
+        <div>专辑</div>
+        <div>时间</div>
+        <div>时长</div>
+        <div class="text-center">格式</div>
+        <div class="text-center">大小</div>
+        <div class="text-center">操作</div>
+      </div>
+      <!-- 列表行 -->
+      <div
+        v-for="(song, index) in songData.songList"
+        :key="index"
+        class="song-list-row grid items-center px-4 py-2 cursor-pointer group"
+      >
+        <div class="flex justify-center">
+          <input
+            type="checkbox"
+            :checked="isSongSelected(song)"
+            @change="toggleSongSelect(song)"
+            class="cursor-pointer accent-primary"
+          />
+        </div>
+        <div class="text-center text-xs text-theme-text-secondary">{{ index + 1 }}</div>
+        <div class="flex justify-center">
+          <img
+            :src="song.album.albumCoverUrl || DefaultImg"
+            alt="封面"
+            class="w-9 h-9 rounded-md object-cover cover-shadow"
+          />
+        </div>
+        <div class="pl-2 text-sm font-medium truncate text-theme-text">{{ song.songName }}</div>
+        <div class="text-sm truncate text-theme-text-secondary">{{ song.singer }}</div>
+        <div class="text-sm truncate text-theme-text-secondary">{{ song.album.albumName }}</div>
+        <div class="text-sm text-theme-text-secondary">{{ song.createTime }}</div>
+        <div class="text-sm text-theme-text-secondary">{{ song.duration }}</div>
+        <div class="text-center">
+          <span
+            v-if="song.songUrl?.urlType"
+            class="inline-block px-1.5 py-0.5 text-[10px] font-bold rounded format-badge"
           >
-            <td class="w-10 px-2 py-3 text-center">
-              <input
-                type="checkbox"
-                :checked="isSongSelected(song)"
-                @change="toggleSongSelect(song)"
-                class="cursor-pointer"
-              />
-            </td>
-            <td class="w-10 px-2 py-3 text-center text-sm text-gray-600">{{ index + 1 }}</td>
-            <td class="w-20 px-2 py-3 text-center">
-              <img
-                :src="song.album.albumCoverUrl || DefaultImg"
-                alt="封面"
-                class="w-10 h-10 rounded-xl object-cover inline-block"
-              />
-            </td>
-            <td class="min-w-[120px] px-3 py-3 text-sm">{{ song.songName }}</td>
-            <td class="min-w-[100px] px-3 py-3 text-sm text-gray-600">{{ song.singer }}</td>
-            <td class="min-w-[120px] px-3 py-3 text-sm text-gray-600">{{ song.album.albumName }}</td>
-            <td class="min-w-[100px] px-3 py-3 text-sm text-gray-600">{{ song.createTime }}</td>
-            <td class="min-w-[60px] px-3 py-3 text-sm text-gray-600">{{ song.duration }}</td>
-            <td class="w-[70px] px-2 py-3 text-center">
-              <span
-                v-if="song.songUrl?.urlType"
-                class="inline-block px-2 py-0.5 text-xs bg-primary/10 text-primary rounded"
-              >
-                {{ song.songUrl.urlType.toUpperCase() }}
-              </span>
-              <span v-else class="text-gray-400">-</span>
-            </td>
-            <td class="w-[90px] px-2 py-3 text-center text-sm text-gray-600">
-              {{ formatFileSize(song.songUrl?.fileSize) }}
-            </td>
-            <td class="w-[60px] px-2 py-3 text-center">
-              <button
-                :disabled="song.songUrl?.url === 'null' || !song.songUrl?.url"
-                :title="song.songUrl?.url === 'null' || !song.songUrl?.url ? '该歌曲链接无效，无法下载' : '点击下载'"
-                class="text-primary hover:text-primary-600 disabled:text-gray-300 disabled:cursor-not-allowed text-base bg-transparent border-none cursor-pointer"
-                @click="handleDownload(song)"
-              >
-                下载
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            {{ song.songUrl.urlType.toUpperCase() }}
+          </span>
+          <span v-else class="text-theme-text-secondary">-</span>
+        </div>
+        <div class="text-center text-sm text-theme-text-secondary">
+          {{ formatFileSize(song.songUrl?.fileSize) }}
+        </div>
+        <div class="flex justify-center">
+          <button
+            :disabled="song.songUrl?.url === 'null' || !song.songUrl?.url"
+            :title="song.songUrl?.url === 'null' || !song.songUrl?.url ? '该歌曲链接无效，无法下载' : '点击下载'"
+            :aria-label="song.songUrl?.url === 'null' || !song.songUrl?.url ? '该歌曲链接无效，无法下载' : '下载'"
+            class="p-1.5 rounded-md transition-all duration-200 cursor-pointer border-none bg-transparent"
+            :class="song.songUrl?.url === 'null' || !song.songUrl?.url ? 'btn-download-disabled' : 'btn-download'"
+            @click="handleDownload(song)"
+          >
+            <font-awesome-icon :icon="['fas', 'download']" class="text-sm" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </section>
 
     <!-- 分页控制器 -->
-    <div class="sticky bottom-0 bg-white flex items-center justify-center gap-2 py-3 z-10 shadow-[0_-1px_4px_rgba(0,0,0,0.05)]">
-      <span class="text-sm text-gray-500 mr-4">共 {{ songData.total }} 条</span>
-      <button
-        :disabled="songData.page <= 1"
-        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        @click="handlePageChange(songData.page - 1)"
-      >
-        上一页
-      </button>
-      <button
-        v-for="p in totalPages"
-        :key="p"
-        :class="[
-          'w-8 h-8 text-sm rounded-lg transition-colors',
-          p === songData.page
-            ? 'bg-primary text-white'
-            : 'border border-gray-300 hover:bg-gray-50'
-        ]"
-        @click="handlePageChange(p)"
-      >
-        {{ p }}
-      </button>
-      <button
-        :disabled="songData.page >= totalPages"
-        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        @click="handlePageChange(songData.page + 1)"
-      >
-        下一页
-      </button>
-      <select
-        :value="songData.pageSize"
-        class="ml-4 h-8 px-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-        @change="handlePageSizeChange"
-      >
-        <option :value="10">10条/页</option>
-        <option :value="20">20条/页</option>
-        <option :value="30">30条/页</option>
-        <option :value="50">50条/页</option>
-      </select>
-    </div>
+    <footer class="flex items-center justify-between py-3 px-4 z-10 border-t border-theme-border">
+      <span class="text-xs text-theme-text-secondary">共 {{ songData.total }} 条</span>
+      <div class="flex items-center gap-1.5">
+        <button
+          :disabled="songData.page <= 1"
+          class="w-8 h-8 text-sm rounded-md transition-colors duration-200 flex items-center justify-center btn-page-nav"
+          aria-label="上一页"
+          @click="handlePageChange(songData.page - 1)"
+        >
+          <font-awesome-icon :icon="['fas', 'chevron-left']" class="text-xs" aria-hidden="true" />
+        </button>
+        <button
+          v-for="p in totalPages"
+          :key="p"
+          :class="[
+            'w-8 h-8 text-xs font-medium rounded-md transition-all duration-200',
+            p === songData.page ? 'btn-page-active' : 'btn-page-default'
+          ]"
+          @click="handlePageChange(p)"
+        >
+          {{ p }}
+        </button>
+        <button
+          :disabled="songData.page >= totalPages"
+          class="w-8 h-8 text-sm rounded-md transition-colors duration-200 flex items-center justify-center btn-page-nav"
+          aria-label="下一页"
+          @click="handlePageChange(songData.page + 1)"
+        >
+          <font-awesome-icon :icon="['fas', 'chevron-right']" class="text-xs" aria-hidden="true" />
+        </button>
+        <select
+          :value="songData.pageSize"
+          class="ml-3 h-8 px-2 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-primary/50 cursor-pointer select-dark"
+          @change="handlePageSizeChange"
+        >
+          <option :value="10">10条/页</option>
+          <option :value="20">20条/页</option>
+          <option :value="30">30条/页</option>
+          <option :value="50">50条/页</option>
+        </select>
+      </div>
+    </footer>
   </div>
 </template>
+
+<style scoped>
+.home-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 200px;
+  border-radius: 9999px;
+  opacity: 0.04;
+  background: radial-gradient(ellipse, var(--color-primary), transparent 70%);
+}
+
+.song-list-header {
+  grid-template-columns: 40px 40px 48px 1fr 140px 160px 100px 60px 70px 80px 60px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.song-list-row {
+  grid-template-columns: 40px 40px 48px 1fr 140px 160px 100px 60px 70px 80px 60px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background-color 0.15s;
+}
+.song-list-row:hover {
+  background: var(--color-hover-overlay);
+}
+</style>

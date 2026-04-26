@@ -2,18 +2,23 @@
 
 ## 项目概述
 
-音乐下载平台是一个基于 Vue.js + Flask 架构的 Web 应用，集成在线音乐搜索下载与本地音乐管理功能。支持通过 QQ 音乐链接获取高音质音乐资源，提供完整的本地音乐播放和管理体验。
+音乐下载平台是一个基于 Electron + Vue.js + Flask 架构的桌面应用，集成在线音乐搜索下载与本地音乐管理功能。支持通过 QQ 音乐链接获取高音质音乐资源，提供完整的本地音乐播放和管理体验。
 
 ## 根目录结构
 
 ```
 music_download/
-├── sys_python/                   # Python 后端服务
-├── sys_vue/                      # Vue.js 前端应用
-├── start_backend.bat             # 后端服务启动脚本
-├── start_frontend.bat            # 前端应用启动脚本
-├── python.zip                    # Python 环境包
-└── 项目结构文档demo.md           # 参考文档模板
+├── sys_python/                   # Python 后端服务（Flask）
+├── sys_vue/                      # Vue.js 前端应用（渲染进程）
+├── sys_electron/                 # Electron 主进程
+│   ├── main.js                   # 主进程入口（窗口管理 + Flask 子进程）
+│   ├── preload.js                # 预加载脚本（安全 IPC 桥接）
+│   ├── menu.js                   # 应用菜单配置
+│   ├── electron.vite.config.js   # electron-vite 构建配置
+│   └── package.json              # Electron 依赖和构建脚本
+├── start_electron.sh             # 开发模式启动脚本（Linux，同时启动后端 + Electron）
+├── start_electron.bat            # 开发模式启动脚本（Windows）
+└── doc/                          # 项目文档
 ```
 
 ## Python 后端服务 (sys_python/)
@@ -221,24 +226,46 @@ music_download/
 
 ### 启动脚本
 
-- **start_backend.bat** - Windows 后端服务启动脚本
-  - 切换到 Python 服务目录
-  - 启动 Flask 开发服务器
-- **start_frontend.bat** - Windows 前端应用启动脚本
-  - 切换到 Vue 应用目录
-  - 启动 Vite 开发服务器
+- **start_electron.sh / start_electron.bat** - 一键启动开发环境
+  - 后台启动 Flask 后端（端口 3492）
+  - 启动 Electron 开发模式（electron-vite dev，前端端口 3493）
+  - Electron 退出时自动清理后端进程
 
 ### 服务端口配置
 
-- **后端服务**：http://localhost:8080
-- **前端应用**：http://localhost:5173
+- **后端服务**：http://localhost:3492
+- **前端应用**：http://localhost:3493
 - **跨域配置**：后端允许前端域名访问
+
+### Electron 开发模式
+
+```bash
+# 1. 安装依赖
+cd sys_electron && npm install
+
+# 2. 启动开发模式（同时启动 Vite dev server + Electron）
+npm run dev
+```
+
+### Electron 构建 & 打包
+
+```bash
+# 构建
+npm run build
+
+# 打包 Linux AppImage
+npm run package:linux
+
+# 打包 Windows NSIS 安装包（需在 Windows 环境执行）
+npm run package:win
+```
 
 ### 环境要求
 
-- **Python 3.7+** - 后端运行环境
-- **Node.js 16+** - 前端构建和运行环境
-- **现代浏览器** - 支持 IndexedDB 和 HTML5 Audio API
+- **Python 3.10+** - 后端运行环境
+- **Node.js 18+** - 前端构建和 Electron 运行环境
+- **PyInstaller** - Flask 后端打包工具
+- **electron-builder** - Electron 安装包打包工具
 
 ## 项目特色功能
 

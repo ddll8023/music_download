@@ -19,16 +19,27 @@ import {
   faForwardStep,
   faBackwardStep,
   faVolumeHigh,
+  faVolumeLow,
+  faVolumeXmark,
   faShuffle,
   faRepeat,
   faList,
   faAnglesLeft,
   faAnglesRight,
+  faChevronLeft,
+  faChevronRight,
+  faMusic,
+  faFileAudio,
+  faFolderOpen,
+  faFloppyDisk,
+  faRotate,
   faUser,
   faCheck,
   faCheckCircle,
   faSpinner,
-  faTimes
+  faXmark,
+  faCircleExclamation,
+  faCircleInfo
 } from '@fortawesome/free-solid-svg-icons'
 
 library.add(
@@ -41,16 +52,27 @@ library.add(
   faForwardStep,
   faBackwardStep,
   faVolumeHigh,
+  faVolumeLow,
+  faVolumeXmark,
   faShuffle,
   faRepeat,
   faList,
   faAnglesLeft,
   faAnglesRight,
+  faChevronLeft,
+  faChevronRight,
+  faMusic,
+  faFileAudio,
+  faFolderOpen,
+  faFloppyDisk,
+  faRotate,
   faUser,
   faCheck,
   faCheckCircle,
   faSpinner,
-  faTimes
+  faXmark,
+  faCircleExclamation,
+  faCircleInfo
 )
 
 const app = createApp(App)

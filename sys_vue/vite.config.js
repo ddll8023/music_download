@@ -6,6 +6,7 @@ import vueDevTools from "vite-plugin-vue-devtools";
 
 // https://vite.dev/config/
 export default defineConfig({
+	base: './',
 	server: { port: 3493 },
 	plugins: [vue(), vueDevTools()],
 	resolve: {
@@ -14,5 +15,4 @@ export default defineConfig({
 			jsmediatags: "jsmediatags/dist/jsmediatags.min.js",
 		},
 	},
-	publicPath: "/static/",
 });

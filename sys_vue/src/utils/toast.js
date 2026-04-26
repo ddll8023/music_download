@@ -3,25 +3,21 @@
  * 替代 Element Plus 的 ElMessage
  */
 
+import { icon, parse } from '@fortawesome/fontawesome-svg-core'
+import {
+  faCheck,
+  faXmark,
+  faCircleExclamation,
+  faCircleInfo
+} from '@fortawesome/free-solid-svg-icons'
+
 let toastCount = 0
 
 const typeConfig = {
-  success: {
-    bg: 'bg-green-500',
-    icon: 'faCheck'
-  },
-  error: {
-    bg: 'bg-red-500',
-    icon: 'faTimes'
-  },
-  warning: {
-    bg: 'bg-yellow-500',
-    icon: 'faSpinner'
-  },
-  info: {
-    bg: 'bg-blue-500',
-    icon: 'faCheckCircle'
-  }
+  success: { bg: 'bg-green-500', faIcon: faCheck },
+  error: { bg: 'bg-red-500', faIcon: faXmark },
+  warning: { bg: 'bg-yellow-500', faIcon: faCircleExclamation },
+  info: { bg: 'bg-blue-500', faIcon: faCircleInfo }
 }
 
 /**
@@ -41,13 +37,14 @@ export function showToast(message, type = 'info') {
 
   toast.style.top = `${16 + toastCount * 56}px`
 
-  const icon = document.createElement('i')
-  icon.className = `fas fa-${config.icon.replace('fa', '').toLowerCase()}`
+  const svgIcon = icon(config.faIcon)
+  const iconWrapper = document.createElement('span')
+  iconWrapper.innerHTML = svgIcon.html[0]
 
   const text = document.createElement('span')
   text.textContent = message
 
-  toast.appendChild(icon)
+  toast.appendChild(iconWrapper)
   toast.appendChild(text)
   document.body.appendChild(toast)
   toastCount++

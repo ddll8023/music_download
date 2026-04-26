@@ -4,22 +4,190 @@
 
 :root {
   --color-primary: #409EFF;
-  --color-sidebar: #2a3042;
+  --color-sidebar: #1c1f2e;
+  --color-sidebar-top: #1e2030;
+  --color-sidebar-bottom: #15172a;
+  --color-sidebar-edge: rgba(255, 255, 255, 0.04);
   --color-sidebar-text: #b5b6bd;
-  --color-bg: #f5f7fa;
-  --color-border: #ebeef5;
-  --color-text: #333333;
-  --color-text-secondary: #909399;
+  --color-sidebar-indicator: var(--color-primary);
+  --color-bg: #12141c;
+  --color-surface: #1a1d2e;
+  --color-elevated: #21243a;
+  --color-border: #2a2e45;
+  --color-text: #e4e6f0;
+  --color-text-secondary: #7a7f9a;
+  --color-titlebar: #1e2233;
+  --color-accent-glow: rgba(64, 158, 255, 0.15);
+  --color-hover-overlay: rgba(255, 255, 255, 0.06);
+  --titlebar-height: 36px;
 }
 
 @layer base {
   body {
-    @apply m-0 p-0 text-base text-gray-800 overflow-x-hidden;
+    @apply m-0 p-0 text-base overflow-x-hidden;
+    color: var(--color-text);
+    background: var(--color-bg);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
+
+  table {
+    @apply border-collapse;
+  }
+
+  th, td {
+    @apply border-none;
+  }
+
+  input[type="range"] {
+    @apply appearance-none bg-transparent;
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track {
+    @apply h-1 rounded-full;
+    background: var(--color-border);
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    @apply appearance-none w-3 h-3 rounded-full cursor-pointer -mt-1;
+    background-color: var(--color-primary);
+    box-shadow: 0 0 8px rgba(64, 158, 255, 0.5);
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  ::selection {
+    background: rgba(64, 158, 255, 0.3);
+    color: #fff;
+  }
+}
+
+.title-bar {
+  -webkit-app-region: drag;
+}
+
+.title-bar-btn {
+  -webkit-app-region: no-drag;
 }
 
 @layer components {
   .card {
-    @apply bg-white p-2.5 rounded shadow-md;
+    @apply p-2.5 rounded-lg;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200;
+    background: var(--color-primary);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.15);
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200;
+    background: var(--color-elevated);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+  }
+  .btn-outline:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  .btn-outline:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-outline-text {
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200;
+    background: var(--color-elevated);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+  .btn-outline-text:hover {
+    border-color: var(--color-primary);
+  }
+  .btn-outline-text:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .cover-shadow {
+    @apply rounded-md;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .format-badge {
+    background: var(--color-accent-glow);
+    color: var(--color-primary);
+  }
+
+  .btn-download {
+    color: var(--color-text-secondary);
+  }
+  .btn-download:hover {
+    color: var(--color-primary);
+  }
+
+  .btn-download-disabled {
+    color: var(--color-text-secondary);
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .btn-page-nav {
+    color: var(--color-text-secondary);
+    background: var(--color-elevated);
+    border: 1px solid var(--color-border);
+  }
+  .btn-page-nav:disabled {
+    opacity: 0.3;
+  }
+
+  .btn-page-active {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(64, 158, 255, 0.3);
+  }
+
+  .btn-page-default {
+    color: var(--color-text-secondary);
+    background: var(--color-elevated);
+    border: 1px solid var(--color-border);
+  }
+  .btn-page-default:hover {
+    border-color: var(--color-primary);
+  }
+
+  .select-dark,
+  .input-dark {
+    background: var(--color-elevated);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+
+  .progress-bar-fill {
+    background: linear-gradient(90deg, var(--color-primary), #6c5ce7);
   }
 }

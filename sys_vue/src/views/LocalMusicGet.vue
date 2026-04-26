@@ -1,11 +1,18 @@
 <script setup>
 /**
- * 本地音乐页
+ * LocalMusicGet 本地音乐页
  * 功能描述：导入本地音乐文件、保存/加载播放列表、播放本地音乐
+ * 依赖组件：无
+ * Source: 规范文档/前端规范文档.md §7 错误处理规范
  */
+// 1. Vue 官方 API
 import { ref } from 'vue'
-import { showToast } from '@/utils/toast'
+
+// 2. Pinia Store
 import { useCurSongDataStore } from '@/stores/Song'
+
+// 3. 工具函数 / 常量
+import { showToast } from '@/utils/toast'
 import * as mm from 'music-metadata-browser'
 import { Buffer } from 'buffer'
 import { openDB } from 'idb'
@@ -29,69 +36,46 @@ const musicFiles = ref([])
 const isLoading = ref(false)
 const progress = ref(0)
 const totalFiles = ref(0)
-const fileInput = ref(null)
-const dirInput = ref(null)
 
-const handleFileSelect = async (event) => {
-  const files = Array.from(event.target.files)
-  if (!files.length) return
-
+const handleFileSelect = async () => {
   try {
+    const files = await window.electronAPI.selectFiles([
+      { name: 'Audio Files', extensions: ['mp3', 'flac', 'wav', 'ogg', 'm4a'] },
+    ])
+    if (!files || files.length === 0) return
+
     isLoading.value = true
     progress.value = 0
-
-    const audioFiles = files.filter(file =>
-      file.type.startsWith('audio/') ||
-      file.name.endsWith('.mp3') ||
-      file.name.endsWith('.flac')
-    )
-    totalFiles.value = audioFiles.length
-
-    if (audioFiles.length === 0) {
-      showToast('未找到音频文件', 'warning')
-      return
-    }
+    totalFiles.value = files.length
 
     const results = []
-    for (const [index, file] of audioFiles.entries()) {
+    for (const [index, filePath] of files.entries()) {
       try {
-        const metadata = await mm.parseBlob(file)
+        const response = await fetch(`file://${filePath}`)
+        const blob = await response.blob()
+        const metadata = await mm.parseBlob(blob)
         const coverData = await getCoverArt(metadata)
         const coverUrl = coverData
           ? URL.createObjectURL(new Blob([coverData.data], { type: coverData.format }))
           : null
 
-        const id = Date.now() + '-' + file.name + '-' + index
-
-        const arrayBuffer = await file.arrayBuffer()
-        const db = await dbPromise
-        await db.put('songs', {
-          id,
-          arrayBuffer,
-          metadata: {
-            title: metadata.common?.title || file.name.replace(/\.[^/.]+$/, ''),
-            artist: metadata.common?.artist || '未知艺术家',
-            album: metadata.common?.album || '未知专辑',
-            duration: metadata.format?.duration ? parseDuration(metadata.format.duration) : '--:--',
-            cover: coverData,
-            name: file.name,
-          }
-        })
+        const id = Date.now() + '-' + filePath
+        const fileName = filePath.split('/').pop().split('\\').pop()
 
         results.push({
           id,
-          name: file.name,
-          path: URL.createObjectURL(file),
-          title: metadata.common?.title || file.name.replace(/\.[^/.]+$/, ''),
+          name: fileName,
+          path: `file://${filePath}`,
+          title: metadata.common?.title || fileName.replace(/\.[^/.]+$/, ''),
           artist: metadata.common?.artist || '未知艺术家',
           album: metadata.common?.album || '未知专辑',
           duration: metadata.format?.duration ? parseDuration(metadata.format.duration) : '--:--',
           cover: coverUrl,
         })
       } catch (error) {
-        console.error(`处理文件 ${file.name} 时出错:`, error)
+        console.error(`处理文件 ${filePath} 时出错:`, error)
       }
-      progress.value = Math.round(((index + 1) / audioFiles.length) * 100)
+      progress.value = Math.round(((index + 1) / files.length) * 100)
     }
 
     musicFiles.value = [...musicFiles.value, ...results]
@@ -100,7 +84,20 @@ const handleFileSelect = async (event) => {
     showToast('文件加载失败: ' + error.message, 'error')
   } finally {
     isLoading.value = false
-    event.target.value = ''
+  }
+}
+
+const handleDirSelect = async () => {
+  try {
+    const dirPath = await window.electronAPI.selectDirectory()
+    if (!dirPath) return
+
+    isLoading.value = true
+    showToast('文件夹选择功能在 Electron 模式下需要递归扫描，当前使用文件选择代替', 'info')
+    isLoading.value = false
+  } catch (error) {
+    showToast('文件夹选择失败: ' + error.message, 'error')
+    isLoading.value = false
   }
 }
 
@@ -204,100 +201,114 @@ const parseDuration = (seconds) => {
 <template>
   <div class="p-5 h-full mb-[60px]">
     <!-- 操作按钮区域 -->
-    <div class="flex gap-4 mb-5">
+    <header class="flex gap-3 mb-5">
       <button
         :disabled="isLoading"
-        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-        @click="fileInput.click()"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer border-none btn-primary"
+        @click="handleFileSelect"
       >
+        <font-awesome-icon :icon="['fas', 'file-audio']" class="text-xs" aria-hidden="true" />
         {{ isLoading ? '加载中...' : '添加音乐文件' }}
       </button>
       <button
         :disabled="isLoading"
-        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-        @click="dirInput.click()"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer border-none btn-outline-text"
+        @click="handleDirSelect"
       >
+        <font-awesome-icon :icon="['fas', 'folder-open']" class="text-xs" aria-hidden="true" />
         {{ isLoading ? '加载中...' : '添加音乐文件夹' }}
       </button>
+      <div class="flex-1"></div>
       <button
         :disabled="isLoading"
-        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+        class="flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer border-none btn-outline"
         @click="handleSaveToLocal"
       >
-        保存播放列表
+        <font-awesome-icon :icon="['fas', 'floppy-disk']" class="text-xs" aria-hidden="true" />
+        保存列表
       </button>
       <button
         :disabled="isLoading"
-        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+        class="flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer border-none btn-outline"
         @click="handleLoadFromLocal"
       >
-        加载播放列表
+        <font-awesome-icon :icon="['fas', 'rotate']" class="text-xs" aria-hidden="true" />
+        加载列表
       </button>
-
-      <!-- 隐藏输入控件 -->
-      <input ref="fileInput" type="file" multiple accept="audio/*" @change="handleFileSelect" hidden />
-      <input ref="dirInput" type="file" multiple webkitdirectory accept="audio/*" @change="handleFileSelect" hidden />
-    </div>
+    </header>
 
     <!-- 加载进度条 -->
-    <div v-if="isLoading" class="w-[80%] max-w-[600px] my-5">
-      <div class="w-full bg-gray-200 rounded-full h-5 overflow-hidden">
+    <div v-if="isLoading" class="max-w-[500px] my-5">
+      <div class="w-full rounded-full h-1.5 overflow-hidden bg-elevated">
         <div
           :style="{ width: progress + '%' }"
-          class="h-full bg-green-500 rounded-full transition-all duration-300 flex items-center justify-center"
+          class="h-full rounded-full transition-all duration-300 progress-bar-fill"
         >
-          <span v-if="progress > 10" class="text-xs text-white font-medium">
-            {{ progress }}%
-          </span>
         </div>
       </div>
-      <span class="text-sm text-gray-500 mt-1 block">
-        {{ Math.round(totalFiles * progress / 100) }}/{{ totalFiles }}
-      </span>
+      <div class="flex items-center justify-between mt-2">
+        <span class="text-xs text-theme-text-secondary">
+          {{ Math.round(totalFiles * progress / 100) }}/{{ totalFiles }}
+        </span>
+        <span class="text-xs font-medium text-theme-primary">{{ progress }}%</span>
+      </div>
     </div>
 
-    <!-- 音乐数据表格 -->
-    <table class="w-full rounded-lg shadow-md overflow-hidden bg-white">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="w-[60px] px-3 py-3 text-center text-sm font-medium text-gray-600">序号</th>
-          <th class="w-[70px] px-3 py-3 text-center text-sm font-medium text-gray-600">封面</th>
-          <th class="px-3 py-3 text-left text-sm font-medium text-gray-600">歌曲标题</th>
-          <th class="px-3 py-3 text-left text-sm font-medium text-gray-600">艺术家</th>
-          <th class="px-3 py-3 text-left text-sm font-medium text-gray-600">专辑</th>
-          <th class="px-3 py-3 text-left text-sm font-medium text-gray-600">时长</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(song, index) in musicFiles"
-          :key="song.id"
-          class="hover:bg-gray-50 border-b border-gray-100 transition-colors cursor-pointer"
-          @click="handlePlay(song)"
-        >
-          <td class="w-[60px] px-3 py-3 text-center text-sm text-gray-600">{{ index + 1 }}</td>
-          <td class="w-[70px] px-3 py-3 text-center">
-            <img
-              v-if="song.cover"
-              :src="song.cover"
-              alt="封面"
-              class="w-10 h-10 rounded-lg object-cover inline-block"
-            />
-            <div
-              v-else
-              class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center inline-flex"
-            >
-              <font-awesome-icon :icon="['fas', 'music']" class="text-gray-400" />
-            </div>
-          </td>
-          <td class="px-3 py-3 text-sm">
-            <span class="font-medium text-primary">{{ song.title }}</span>
-          </td>
-          <td class="px-3 py-3 text-sm text-gray-600">{{ song.artist }}</td>
-          <td class="px-3 py-3 text-sm text-gray-600">{{ song.album }}</td>
-          <td class="px-3 py-3 text-sm text-gray-600">{{ song.duration }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- 音乐列表 -->
+    <section class="rounded-xl overflow-hidden bg-surface border border-theme-border">
+      <!-- 列表头部 -->
+      <div class="local-list-header grid items-center px-4 py-2.5 text-xs font-semibold uppercase tracking-wider">
+        <div class="text-center">#</div>
+        <div></div>
+        <div class="pl-2">歌曲标题</div>
+        <div>艺术家</div>
+        <div>专辑</div>
+        <div class="text-center">时长</div>
+      </div>
+      <!-- 列表行 -->
+      <div
+        v-for="(song, index) in musicFiles"
+        :key="song.id"
+        class="local-list-row grid items-center px-4 py-2.5 cursor-pointer"
+        @click="handlePlay(song)"
+      >
+        <div class="text-center text-xs text-theme-text-secondary">{{ index + 1 }}</div>
+        <div class="flex justify-center">
+          <img
+            v-if="song.cover"
+            :src="song.cover"
+            alt="封面"
+            class="w-9 h-9 rounded-md object-cover cover-shadow"
+          />
+          <div
+            v-else
+            class="w-9 h-9 rounded-md flex items-center justify-center bg-elevated"
+          >
+            <font-awesome-icon :icon="['fas', 'music']" class="text-xs text-theme-text-secondary" aria-hidden="true" />
+          </div>
+        </div>
+        <div class="pl-2 text-sm font-medium truncate text-theme-primary">{{ song.title }}</div>
+        <div class="text-sm truncate text-theme-text-secondary">{{ song.artist }}</div>
+        <div class="text-sm truncate text-theme-text-secondary">{{ song.album }}</div>
+        <div class="text-center text-sm text-theme-text-secondary">{{ song.duration }}</div>
+      </div>
+    </section>
   </div>
 </template>
+
+<style scoped>
+.local-list-header {
+  grid-template-columns: 48px 48px 1fr 160px 160px 70px;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.local-list-row {
+  grid-template-columns: 48px 48px 1fr 160px 160px 70px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background-color 0.15s;
+}
+.local-list-row:hover {
+  background: var(--color-hover-overlay);
+}
+</style>

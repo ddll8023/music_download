@@ -5,18 +5,21 @@ const router = createRouter({
 	routes: [
 		{
 			path: "/",
-			redirect:'/home',
+			redirect: '/home',
+			name: 'Index',
 			component: () => import("../views/Index.vue"),
 			children: [
 				{
 					path: "/home",
+					name: 'Home',
 					component: () => import("../views/Home.vue"),
 				},
 				{
-					path:"/localmusic",
-					component: () => import("../views/LocalMusicGet.vue")
-				}
-			]
+					path: "/localmusic",
+					name: 'LocalMusic',
+					component: () => import("../views/LocalMusicGet.vue"),
+				},
+			],
 		},
 
 	],

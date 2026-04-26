@@ -21,7 +21,17 @@ export default {
           900: '#1a4d8f'
         },
         sidebar: '#2a3042',
-        'sidebar-hover': '#1a1f2e'
+        'sidebar-hover': '#1a1f2e',
+        surface: 'var(--color-surface)',
+        elevated: 'var(--color-elevated)',
+        'theme-border': 'var(--color-border)',
+        'theme-text': 'var(--color-text)',
+        'theme-text-secondary': 'var(--color-text-secondary)',
+        'theme-primary': 'var(--color-primary)',
+        'hover-overlay': 'var(--color-hover-overlay)',
+        'accent-glow': 'var(--color-accent-glow)',
+        titlebar: 'var(--color-titlebar)',
+        'theme-bg': 'var(--color-bg)'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
