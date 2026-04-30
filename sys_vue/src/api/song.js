@@ -11,7 +11,7 @@ import request from '@/utils/request'
  * @returns {Promise} 搜索结果，包含歌曲列表和总数
  */
 export function searchSongs(params) {
-  return request.post('/song/search', params)
+  return request.post('/api/v1/song/search', params)
 }
 
 /**
@@ -20,7 +20,7 @@ export function searchSongs(params) {
  * @returns {Promise} 封面图片 URL 列表
  */
 export function getAlbumImages(albumIdList) {
-  return request.post('/song/albumImg', { album_id_list: albumIdList })
+  return request.post('/api/v1/song/albumImg', { album_id_list: albumIdList })
 }
 
 /**
@@ -29,5 +29,5 @@ export function getAlbumImages(albumIdList) {
  * @returns {Promise} 歌曲播放链接列表，包含 URL、格式、文件大小等信息
  */
 export function getSongUrls(songIdList) {
-  return request.post('/song/songUrl', { song_id_list: songIdList })
+  return request.post('/api/v1/song/songUrl', { song_id_list: songIdList })
 }

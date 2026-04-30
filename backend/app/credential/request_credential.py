@@ -1,7 +1,7 @@
 """QQ 音乐二维码登录脚本"""
 import asyncio
 import json
-import os.path
+import os
 
 from qqmusic_api import Client
 from qqmusic_api.models.login import QRLoginType, QRCodeLoginEvents
@@ -14,7 +14,7 @@ def show_qrcode(qr):
 
         from PIL import Image
         from pyzbar.pyzbar import decode
-        from qrcode import QRCode  # type: ignore
+        from qrcode import QRCode
 
         img = Image.open(BytesIO(qr.data))
         url = decode(img)[0].data.decode("utf-8")
@@ -26,9 +26,8 @@ def show_qrcode(qr):
         print(f"二维码已保存至: {save_path}")
 
 
-async def qrcode_login_example(login_type: QRLoginType):
-    """二维码登录示例"""
-
+async def qrcode_login(login_type: QRLoginType):
+    """二维码登录"""
     try:
         async with Client() as client:
             qr = await client.login.get_qrcode(login_type)
@@ -64,19 +63,21 @@ async def main():
     choice = input("请输入选项 (1/2): ").strip()
 
     if choice == "1":
-        credential = await qrcode_login_example(QRLoginType.QQ)
-        credential_json = credential.model_dump_json()
-        print(credential_json)
-        with open(os.path.join(os.path.dirname(__file__), "credential.json"), "w", encoding="utf-8") as f:
-            f.write(credential_json)
+        credential = await qrcode_login(QRLoginType.QQ)
     elif choice == "2":
-        credential = await qrcode_login_example(QRLoginType.WX)
-        credential_json = credential.model_dump_json()
-        print(credential_json)
-        with open(os.path.join(os.path.dirname(__file__), "credential.json"), "w", encoding="utf-8") as f:
-            f.write(credential_json)
+        credential = await qrcode_login(QRLoginType.WX)
     else:
         print("无效的选项")
+        return
+
+    credential_json = credential.model_dump_json()
+    print(credential_json)
+    with open(
+        os.path.join(os.path.dirname(__file__), "credential.json"),
+        "w",
+        encoding="utf-8",
+    ) as f:
+        f.write(credential_json)
 
 
 if __name__ == "__main__":

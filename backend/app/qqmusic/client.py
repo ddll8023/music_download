@@ -1,7 +1,8 @@
 """QQ Music API 客户端管理"""
 from qqmusic_api import Client
 from qqmusic_api.models.request import Credential
-from credential.get_credential import get_credential
+
+from app.credential.get_credential import get_credential
 
 _client: Client | None = None
 

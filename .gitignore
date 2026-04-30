@@ -11,6 +11,11 @@ sys_python/dist/
 sys_python/build/
 sys_python/music_backend.spec
 
+backend/.venv
+backend/.env
+backend/app.log
+backend/app/credential/credential.json
+
 sys_vue/dist
 sys_vue/node_modules
 sys_vue/.env.development

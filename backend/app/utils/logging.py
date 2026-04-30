@@ -1,31 +1,30 @@
+"""日志配置"""
 import logging
 from logging.handlers import RotatingFileHandler
 
+from app.core.config import settings
+
 
 def configure_logging():
-    # 创建格式器
     formatter = logging.Formatter(
         "%(asctime)s - %(levelname)s - %(module)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # 文件处理器（UTF-8编码）
     file_handler = RotatingFileHandler(
-        "app.log", maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10MB
+        settings.log_file,
+        maxBytes=settings.log_max_size,
+        backupCount=settings.log_backup_count,
+        encoding="utf-8",
     )
     file_handler.setFormatter(formatter)
 
-    # 控制台处理器
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
 
-    # 获取根日志器
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    logger.setLevel(settings.log_level)
 
-    # 清除现有的处理器
     logger.handlers = []
-
-    # 添加新的处理器
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)

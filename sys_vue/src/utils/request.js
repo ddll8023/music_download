@@ -39,8 +39,8 @@ request.interceptors.response.use(
     if (res.code === 0) {
       return res
     }
-    showToast(res.msg || '请求失败', 'error')
-    return Promise.reject(new Error(res.msg || '请求失败'))
+    showToast(res.message || '请求失败', 'error')
+    return Promise.reject(new Error(res.message || '请求失败'))
   },
   (error) => {
     if (error.response) {

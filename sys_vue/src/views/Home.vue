@@ -56,13 +56,13 @@ function generateRequestId() {
 
 const homeColumns = [
   { key: 'index', type: 'index', width: '40px', label: '#', headerAlign: 'center' },
-  { key: 'cover', type: 'cover', width: '48px', label: '', field: 'album.albumCoverUrl', fallback: DefaultImg, headerAlign: 'center' },
-  { key: 'songName', label: '歌名', field: 'songName', width: '1fr', cellClass: 'text-sm font-medium truncate text-theme-text' },
+  { key: 'cover', type: 'cover', width: '48px', label: '', field: 'album.album_cover_url', fallback: DefaultImg, headerAlign: 'center' },
+  { key: 'songName', label: '歌名', field: 'song_name', width: '1fr', cellClass: 'text-sm font-medium truncate text-theme-text' },
   { key: 'singer', label: '歌手', field: 'singer', width: '140px' },
-  { key: 'albumName', label: '专辑', field: 'album.albumName', width: '160px' },
-  { key: 'createTime', label: '时间', field: 'createTime', width: '100px' },
+  { key: 'albumName', label: '专辑', field: 'album.album_name', width: '160px' },
+  { key: 'createTime', label: '时间', field: 'create_time', width: '100px' },
   { key: 'duration', label: '时长', field: 'duration', width: '60px' },
-  { key: 'urlType', type: 'format', width: '70px', label: '格式', field: 'songUrl.urlType', headerAlign: 'center' },
+  { key: 'urlType', type: 'format', width: '70px', label: '格式', field: 'song_url.url_type', headerAlign: 'center' },
   { key: 'fileSize', type: 'slot', label: '大小', width: '80px', headerAlign: 'center' },
   {
     key: 'download',
@@ -71,12 +71,12 @@ const homeColumns = [
     label: '操作',
     headerAlign: 'center',
     icon: ['fas', 'download'],
-    disabled: (song) => song.songUrl?.url === 'null' || !song.songUrl?.url,
-    title: (song) => song.songUrl?.url === 'null' || !song.songUrl?.url ? '该歌曲链接无效，无法下载' : '点击下载'
+    disabled: (song) => song.song_url?.url === 'null' || !song.song_url?.url,
+    title: (song) => song.song_url?.url === 'null' || !song.song_url?.url ? '该歌曲链接无效，无法下载' : '点击下载'
   }
 ]
 
-const selectedSongMids = computed(() => selectedSongs.value.map(s => s.songMid))
+const selectedSongMids = computed(() => selectedSongs.value.map(s => s.song_mid))
 
 const handleSearch = async () => {
   try {
@@ -94,12 +94,12 @@ const handleSearch = async () => {
       request_id: requestId
     })
 
-    if (searchResponse.data.requestId !== currentRequestId) return
+    if (searchResponse.data.request_id !== currentRequestId) return
 
     songData.songList = searchResponse.data.result
     songData.total = searchResponse.data.total
 
-    const songAlbumIdList = songData.songList.map(item => item.album.albumMid.toString())
+    const songAlbumIdList = songData.songList.map(item => item.album.album_mid.toString())
     await getAlbumImg(songAlbumIdList)
   } catch (err) {
     error.value = '歌曲搜索失败，请稍后重试'
@@ -116,15 +116,15 @@ const getAlbumImg = async (songAlbumIdList) => {
     if (validIds.length === 0) return
 
     const imgResponse = await getAlbumImages(validIds)
-    if (imgResponse.data.requestId !== currentRequestId) return
+    if (imgResponse.data.request_id !== currentRequestId) return
 
     imgResponse.data = imgResponse.data.result
     if (imgResponse.data) {
       for (let i = 0; i < songData.songList.length; i++) {
-        songData.songList[i].album.albumCoverUrl = imgResponse.data[i]
+        songData.songList[i].album.album_cover_url = imgResponse.data[i]
       }
     }
-    validIds = songData.songList.map(item => item.songMid.toString())
+    validIds = songData.songList.map(item => item.song_mid.toString())
     await getSongUrl(validIds)
   } catch (error) {
     console.error('封面获取失败:', error)
@@ -135,12 +135,12 @@ const getSongUrl = async (validIds) => {
   try {
     const requestId = currentRequestId
     const songUrlResponse = await getSongUrls(validIds)
-    if (songUrlResponse.data.requestId !== currentRequestId) return
+    if (songUrlResponse.data.request_id !== currentRequestId) return
 
     songUrlResponse.data = songUrlResponse.data.result
     if (songUrlResponse.data) {
       for (let i = 0; i < songData.songList.length; i++) {
-        songData.songList[i].songUrl = songUrlResponse.data[i]
+        songData.songList[i].song_url = songUrlResponse.data[i]
       }
     }
     showToast('音乐链接获取成功', 'success')
@@ -151,18 +151,18 @@ const getSongUrl = async (validIds) => {
 
 const handleDownload = async (song) => {
   try {
-    if (!songData.songList[0]?.songUrl?.url) {
+    if (!songData.songList[0]?.song_url?.url) {
       showToast('请等待音乐链接获取完成', 'warning')
       return
     }
-    if (!song.songUrl.url) {
+    if (!song.song_url.url) {
       showToast('音乐链接获取失败', 'warning')
       return
     }
 
     const success = await window.electronAPI.downloadFile({
-      url: song.songUrl.url,
-      filename: `${song.songName}-${song.singer}.${song.songUrl.urlType}`,
+      url: song.song_url.url,
+      filename: `${song.song_name}-${song.singer}.${song.song_url.url_type}`,
     })
     if (success) {
       showToast('下载成功', 'success')
@@ -206,12 +206,12 @@ const handleAllDownload = async () => {
     showToast('请选择要下载的歌曲', 'warning')
     return
   }
-  if (!songData.songList[0]?.songUrl?.url) {
+  if (!songData.songList[0]?.song_url?.url) {
     showToast('请等待音乐链接获取完成', 'warning')
     return
   }
 
-  const validSongs = selectedSongs.value.filter(song => song.songUrl?.url && song.songUrl?.url !== 'null')
+  const validSongs = selectedSongs.value.filter(song => song.song_url?.url && song.song_url?.url !== 'null')
 
   if (validSongs.length === 0) {
     showToast('选中的歌曲均无法下载，请重新选择', 'warning')
@@ -287,7 +287,7 @@ const formatFileSize = (bytes) => {
       :songs="songData.songList"
       :columns="homeColumns"
       :selectable="true"
-      row-key="songMid"
+      row-key="song_mid"
       :selected-keys="selectedSongMids"
       :select-all="selectAllChecked"
       empty-text="请搜索歌曲..."
@@ -298,7 +298,7 @@ const formatFileSize = (bytes) => {
     >
       <template #fileSize="{ song }">
         <div class="text-center text-sm text-theme-text-secondary">
-          {{ formatFileSize(song.songUrl?.fileSize) }}
+          {{ formatFileSize(song.song_url?.file_size) }}
         </div>
       </template>
     </SongListTable>
