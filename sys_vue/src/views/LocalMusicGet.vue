@@ -2,11 +2,11 @@
 /**
  * LocalMusicGet 本地音乐页
  * 功能描述：导入本地音乐文件、保存/加载播放列表、播放本地音乐
- * 依赖组件：无
+ * 依赖组件：BaseButton, BaseProgressBar, SongListTable
  * Source: 规范文档/前端规范文档.md §7 错误处理规范
  */
 // 1. Vue 官方 API
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 // 2. Pinia Store
 import { useCurSongDataStore } from '@/stores/Song'
@@ -16,6 +16,11 @@ import { showToast } from '@/utils/toast'
 import * as mm from 'music-metadata-browser'
 import { Buffer } from 'buffer'
 import { openDB } from 'idb'
+
+// 5. 子组件导入
+import BaseButton from '@/components/base/BaseButton.vue'
+import BaseProgressBar from '@/components/base/BaseProgressBar.vue'
+import SongListTable from '@/components/business/SongListTable.vue'
 
 window.Buffer = Buffer
 
@@ -36,6 +41,15 @@ const musicFiles = ref([])
 const isLoading = ref(false)
 const progress = ref(0)
 const totalFiles = ref(0)
+
+const localColumns = [
+  { key: 'index', type: 'index', width: '48px', label: '#', headerAlign: 'center' },
+  { key: 'cover', type: 'cover', width: '48px', label: '', field: 'cover', headerAlign: 'center' },
+  { key: 'title', label: '歌曲标题', field: 'title', width: '1fr', cellClass: 'text-sm font-medium truncate text-theme-primary' },
+  { key: 'artist', label: '艺术家', field: 'artist', width: '160px' },
+  { key: 'album', label: '专辑', field: 'album', width: '160px' },
+  { key: 'duration', label: '时长', field: 'duration', width: '70px', headerAlign: 'center' }
+]
 
 const handleFileSelect = async () => {
   try {
@@ -202,113 +216,44 @@ const parseDuration = (seconds) => {
   <div class="p-5 h-full mb-[60px]">
     <!-- 操作按钮区域 -->
     <header class="flex gap-3 mb-5">
-      <button
-        :disabled="isLoading"
-        class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer border-none btn-primary"
-        @click="handleFileSelect"
-      >
-        <font-awesome-icon :icon="['fas', 'file-audio']" class="text-xs" aria-hidden="true" />
-        {{ isLoading ? '加载中...' : '添加音乐文件' }}
-      </button>
-      <button
-        :disabled="isLoading"
-        class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer border-none btn-outline-text"
-        @click="handleDirSelect"
-      >
-        <font-awesome-icon :icon="['fas', 'folder-open']" class="text-xs" aria-hidden="true" />
-        {{ isLoading ? '加载中...' : '添加音乐文件夹' }}
-      </button>
+      <BaseButton variant="primary" :loading="isLoading" @click="handleFileSelect">
+        <template #icon>
+          <font-awesome-icon :icon="['fas', 'file-audio']" class="text-xs" aria-hidden="true" />
+        </template>
+        添加音乐文件
+      </BaseButton>
+      <BaseButton variant="outline" :loading="isLoading" @click="handleDirSelect">
+        <template #icon>
+          <font-awesome-icon :icon="['fas', 'folder-open']" class="text-xs" aria-hidden="true" />
+        </template>
+        添加音乐文件夹
+      </BaseButton>
       <div class="flex-1"></div>
-      <button
-        :disabled="isLoading"
-        class="flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer border-none btn-outline"
-        @click="handleSaveToLocal"
-      >
-        <font-awesome-icon :icon="['fas', 'floppy-disk']" class="text-xs" aria-hidden="true" />
+      <BaseButton variant="outline" size="sm" :disabled="isLoading" @click="handleSaveToLocal">
+        <template #icon>
+          <font-awesome-icon :icon="['fas', 'floppy-disk']" class="text-xs" aria-hidden="true" />
+        </template>
         保存列表
-      </button>
-      <button
-        :disabled="isLoading"
-        class="flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer border-none btn-outline"
-        @click="handleLoadFromLocal"
-      >
-        <font-awesome-icon :icon="['fas', 'rotate']" class="text-xs" aria-hidden="true" />
+      </BaseButton>
+      <BaseButton variant="outline" size="sm" :disabled="isLoading" @click="handleLoadFromLocal">
+        <template #icon>
+          <font-awesome-icon :icon="['fas', 'rotate']" class="text-xs" aria-hidden="true" />
+        </template>
         加载列表
-      </button>
+      </BaseButton>
     </header>
 
     <!-- 加载进度条 -->
     <div v-if="isLoading" class="max-w-[500px] my-5">
-      <div class="w-full rounded-full h-1.5 overflow-hidden bg-elevated">
-        <div
-          :style="{ width: progress + '%' }"
-          class="h-full rounded-full transition-all duration-300 progress-bar-fill"
-        >
-        </div>
-      </div>
-      <div class="flex items-center justify-between mt-2">
-        <span class="text-xs text-theme-text-secondary">
-          {{ Math.round(totalFiles * progress / 100) }}/{{ totalFiles }}
-        </span>
-        <span class="text-xs font-medium text-theme-primary">{{ progress }}%</span>
-      </div>
+      <BaseProgressBar :percent="progress" :current="Math.round(totalFiles * progress / 100)" :total="totalFiles" height="6px" />
     </div>
 
     <!-- 音乐列表 -->
-    <section class="rounded-xl overflow-hidden bg-surface border border-theme-border">
-      <!-- 列表头部 -->
-      <div class="local-list-header grid items-center px-4 py-2.5 text-xs font-semibold uppercase tracking-wider">
-        <div class="text-center">#</div>
-        <div></div>
-        <div class="pl-2">歌曲标题</div>
-        <div>艺术家</div>
-        <div>专辑</div>
-        <div class="text-center">时长</div>
-      </div>
-      <!-- 列表行 -->
-      <div
-        v-for="(song, index) in musicFiles"
-        :key="song.id"
-        class="local-list-row grid items-center px-4 py-2.5 cursor-pointer"
-        @click="handlePlay(song)"
-      >
-        <div class="text-center text-xs text-theme-text-secondary">{{ index + 1 }}</div>
-        <div class="flex justify-center">
-          <img
-            v-if="song.cover"
-            :src="song.cover"
-            alt="封面"
-            class="w-9 h-9 rounded-md object-cover cover-shadow"
-          />
-          <div
-            v-else
-            class="w-9 h-9 rounded-md flex items-center justify-center bg-elevated"
-          >
-            <font-awesome-icon :icon="['fas', 'music']" class="text-xs text-theme-text-secondary" aria-hidden="true" />
-          </div>
-        </div>
-        <div class="pl-2 text-sm font-medium truncate text-theme-primary">{{ song.title }}</div>
-        <div class="text-sm truncate text-theme-text-secondary">{{ song.artist }}</div>
-        <div class="text-sm truncate text-theme-text-secondary">{{ song.album }}</div>
-        <div class="text-center text-sm text-theme-text-secondary">{{ song.duration }}</div>
-      </div>
-    </section>
+    <SongListTable
+      :songs="musicFiles"
+      :columns="localColumns"
+      empty-text="请添加本地音乐文件"
+      @row-click="handlePlay"
+    />
   </div>
 </template>
-
-<style scoped>
-.local-list-header {
-  grid-template-columns: 48px 48px 1fr 160px 160px 70px;
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.local-list-row {
-  grid-template-columns: 48px 48px 1fr 160px 160px 70px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  transition: background-color 0.15s;
-}
-.local-list-row:hover {
-  background: var(--color-hover-overlay);
-}
-</style>

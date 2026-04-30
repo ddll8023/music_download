@@ -1,12 +1,22 @@
+/**
+ * 应用入口文件
+ * 功能描述：初始化 Vue3 应用，挂载 Router、Pinia、Tailwind CSS、Font Awesome 图标库
+ */
+
+// 1. Vue 官方 API
 import { createApp } from 'vue'
 import App from './App.vue'
+
+// 2. Vue Router
 import router from './router'
+
+// 3. Pinia Store
 import { createPinia } from 'pinia'
 
-// Tailwind CSS
+// 4. 样式资源
 import '@/assets/css/tailwind.css'
 
-// Font Awesome
+// 5. Font Awesome 图标库
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {

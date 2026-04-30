@@ -1,4 +1,9 @@
-import {ref} from 'vue'
+/**
+ * 当前播放歌曲 Store
+ * 功能描述：管理播放列表、当前歌曲、播放状态、播放模式等
+ */
+
+import {ref, shallowRef} from 'vue'
 import {defineStore} from 'pinia'
 
 export const useCurSongDataStore = defineStore('curSong', () => {
@@ -9,7 +14,7 @@ export const useCurSongDataStore = defineStore('curSong', () => {
     const currentTime = ref(0)
     const duration = ref(0)
     const playMode = ref('order') // 'order' 或 'shuffle'
-    const shuffledList = ref([])    // 随机播放列表
+    const shuffledList = shallowRef([])    // 随机播放列表
     const currentShuffleIndex = ref(-1) // 当前随机索引
     // 切换播放模式
     const togglePlayMode = () => {
@@ -19,15 +24,14 @@ export const useCurSongDataStore = defineStore('curSong', () => {
         }
     }
 
-    // 生成随机播放列表
+    // 生成随机播放列表（Fisher-Yates 洗牌算法）
     const generateShuffledList = () => {
-        shuffledList.value = [...curSonglist.value]
-        // Fisher-Yates 洗牌算法
-        for (let i = shuffledList.value.length - 1; i > 0; i--) {
+        const arr = [...curSonglist.value]
+        for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [shuffledList.value[i], shuffledList.value[j]] =
-                [shuffledList.value[j], shuffledList.value[i]]
+            [arr[i], arr[j]] = [arr[j], arr[i]]
         }
+        shuffledList.value = arr
         updateShuffleIndex()
     }
 

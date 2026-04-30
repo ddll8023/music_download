@@ -7,10 +7,12 @@
  */
 import { ref, watch } from 'vue'
 import { useCurSongDataStore } from '@/stores/Song'
+import BaseSlider from '@/components/base/BaseSlider.vue'
 import DefaultImg from '@/assets/img/init_img.jpg'
 
 const curSongStore = useCurSongDataStore()
 const volume = ref(80)
+const previousVolume = ref(80)
 const audioElement = ref(null)
 
 const formatTime = (seconds) => {
@@ -52,13 +54,21 @@ const setupAudioElement = () => {
   }
 }
 
-const handleSeek = (e) => {
-  const time = Number(e.target.value)
-  curSongStore.seek(time)
+const handleSeek = (time) => {
+  curSongStore.seek(Number(time))
 }
 
-const handleVolumeChange = (e) => {
-  volume.value = Number(e.target.value)
+const handleVolumeChange = (val) => {
+  volume.value = Number(val)
+}
+
+const toggleMute = () => {
+  if (volume.value > 0) {
+    previousVolume.value = volume.value
+    volume.value = 0
+  } else {
+    volume.value = previousVolume.value || 80
+  }
 }
 
 watch(() => curSongStore.currentSong, (newSong) => {
@@ -166,13 +176,13 @@ watch(() => curSongStore.currentTime, (newTime) => {
         <span class="text-[11px] tabular-nums min-w-[36px] text-right text-theme-text-secondary">
           {{ formatTime(curSongStore.currentTime) }}
         </span>
-        <input
-          type="range"
+        <BaseSlider
+          :model-value="curSongStore.currentTime"
           :min="0"
           :max="curSongStore.duration || 0"
-          :value="curSongStore.currentTime"
-          @input="handleSeek"
-          class="flex-1 h-1 rounded-full appearance-none cursor-pointer range-track"
+          height="4px"
+          class="flex-1"
+          @update:model-value="handleSeek"
         />
         <span class="text-[11px] tabular-nums min-w-[36px] text-theme-text-secondary">
           {{ formatTime(curSongStore.duration) }}
@@ -185,15 +195,17 @@ watch(() => curSongStore.currentTime, (newTime) => {
       <button
         class="p-1 bg-transparent border-none cursor-pointer transition-colors duration-200 ctrl-btn"
         :aria-label="volume === 0 ? '取消静音' : '静音'"
+        @click="toggleMute"
       >
         <font-awesome-icon :icon="volume === 0 ? ['fas', 'volume-xmark'] : volume < 50 ? ['fas', 'volume-low'] : ['fas', 'volume-high']" class="text-sm" aria-hidden="true" />
       </button>
-      <input
-        type="range"
-        v-model.number="volume"
+      <BaseSlider
+        :model-value="volume"
+        :min="0"
         :max="100"
-        class="w-[100px] h-1 rounded-full appearance-none cursor-pointer range-track"
-        @input="handleVolumeChange"
+        height="4px"
+        class="w-[100px]"
+        @update:model-value="handleVolumeChange"
       />
       <span class="text-[11px] tabular-nums min-w-[28px] text-right text-theme-text-secondary">{{ volume }}</span>
     </div>
@@ -234,9 +246,5 @@ watch(() => curSongStore.currentTime, (newTime) => {
   background: var(--color-elevated);
   color: var(--color-text);
   border: 1px solid var(--color-border);
-}
-
-.range-track {
-  background: var(--color-border);
 }
 </style>

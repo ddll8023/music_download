@@ -3,6 +3,7 @@
  * 替代 Element Plus 的 ElMessage
  */
 
+// 1. Font Awesome 图标
 import { icon, parse } from '@fortawesome/fontawesome-svg-core'
 import {
   faCheck,
@@ -39,6 +40,7 @@ export function showToast(message, type = 'info') {
 
   const svgIcon = icon(config.faIcon)
   const iconWrapper = document.createElement('span')
+  iconWrapper.setAttribute('aria-hidden', 'true')
   iconWrapper.innerHTML = svgIcon.html[0]
 
   const text = document.createElement('span')

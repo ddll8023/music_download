@@ -1,15 +1,22 @@
+/**
+ * Axios 请求封装
+ * 功能描述：统一请求/响应拦截，错误处理，Token 注入
+ */
+
 import axios from 'axios'
 import { showToast } from '@/utils/toast.js'
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3492',
   timeout: 300000,
+  headers: {
+    'Content-Type': 'application/json;charset=UTF-8'
+  }
 })
 
-// request 拦截器
+// 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    config.headers['Content-Type'] = 'application/json;charset=UTF-8'
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`

@@ -1,3 +1,7 @@
+/**
+ * 路由配置文件
+ * 功能描述：定义应用路由表，所有页面路由使用懒加载
+ */
 import { createRouter, createWebHistory } from "vue-router";
 
 const router = createRouter({
