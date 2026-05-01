@@ -19,8 +19,8 @@ export function searchSongs(params) {
  * @param {string[]} albumIdList - 专辑 MID 列表
  * @returns {Promise} 封面图片 URL 列表
  */
-export function getAlbumImages(albumIdList) {
-  return request.post('/api/v1/song/albumImg', { album_id_list: albumIdList })
+export function getAlbumImages(albumIdList, requestId) {
+  return request.post('/api/v1/song/albumImg', { album_id_list: albumIdList, request_id: requestId })
 }
 
 /**
@@ -28,6 +28,6 @@ export function getAlbumImages(albumIdList) {
  * @param {string[]} songIdList - 歌曲 MID 列表
  * @returns {Promise} 歌曲播放链接列表，包含 URL、格式、文件大小等信息
  */
-export function getSongUrls(songIdList) {
-  return request.post('/api/v1/song/songUrl', { song_id_list: songIdList })
+export function getSongUrls(songIdList, requestId) {
+  return request.post('/api/v1/song/songUrl', { song_id_list: songIdList, request_id: requestId })
 }

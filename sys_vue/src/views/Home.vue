@@ -115,13 +115,13 @@ const getAlbumImg = async (songAlbumIdList) => {
     let validIds = songAlbumIdList.filter(Boolean)
     if (validIds.length === 0) return
 
-    const imgResponse = await getAlbumImages(validIds)
+    const imgResponse = await getAlbumImages(validIds, currentRequestId)
     if (imgResponse.data.request_id !== currentRequestId) return
 
-    imgResponse.data = imgResponse.data.result
-    if (imgResponse.data) {
+    const imgResult = imgResponse.data.result
+    if (imgResult) {
       for (let i = 0; i < songData.songList.length; i++) {
-        songData.songList[i].album.album_cover_url = imgResponse.data[i]
+        songData.songList[i].album.album_cover_url = imgResult[i]
       }
     }
     validIds = songData.songList.map(item => item.song_mid.toString())
@@ -134,13 +134,13 @@ const getAlbumImg = async (songAlbumIdList) => {
 const getSongUrl = async (validIds) => {
   try {
     const requestId = currentRequestId
-    const songUrlResponse = await getSongUrls(validIds)
+    const songUrlResponse = await getSongUrls(validIds, currentRequestId)
     if (songUrlResponse.data.request_id !== currentRequestId) return
 
-    songUrlResponse.data = songUrlResponse.data.result
-    if (songUrlResponse.data) {
+    const urlResult = songUrlResponse.data.result
+    if (urlResult) {
       for (let i = 0; i < songData.songList.length; i++) {
-        songData.songList[i].song_url = songUrlResponse.data[i]
+        songData.songList[i].song_url = urlResult[i]
       }
     }
     showToast('音乐链接获取成功', 'success')
