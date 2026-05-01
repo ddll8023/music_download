@@ -26,6 +26,5 @@ sys_electron/release/
 sys_electron/node_modules/
 
 app.log
-start_electron.bat
 启动后端.bat
 启动前端.bat
